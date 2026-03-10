@@ -89,3 +89,36 @@ export const decodeToken = (token: string) => {
     return null;
   }
 };
+
+/**
+ * 텍스트를 임베딩 벡터로 변환 (외부 API 사용)
+ */
+export const getTextEmbedding = async (text: string): Promise<number[]> => {
+  try {
+    const response = await fetch(
+      "https://spring000009-rag-hf.hf.space/embedding/text_to_embedding",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        body: JSON.stringify({ text }),
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(`Embedding API error: ${response.statusText}`);
+    }
+
+    const result = await response.json();
+    if (result.success && result.data?.embedding) {
+      return result.data.embedding;
+    } else {
+      throw new Error(result.msg || "Failed to get embedding");
+    }
+  } catch (error: any) {
+    console.error("getTextEmbedding error:", error.message);
+    throw error;
+  }
+};
